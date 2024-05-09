@@ -4,19 +4,30 @@ classdef VibrometerAPI
     
     properties (Hidden=true)
         device
+        isDefined
     end
     properties
-        prec_mod = 100
+        prec_mod = 100 % TODO - read these from driver!
+        point_accuracy = 0.5;
     end
     
     methods
         function obj = VibrometerAPI(SerialPort)
             %VIBROMETERAPI Construct an instance of this class
             %   Detailed explanation goes here
-            obj.device = serialport(SerialPort,9600);
+            try
+                obj.device = serialport(SerialPort,9600);
+            catch ME
+                obj.close()
+                pause(0.5);
+                obj.device = serialport(SerialPort,9600);
+            end
+
             configureTerminator(obj.device,"CR");
             pause(0.5);
             flush(obj.device);
+
+            obj.isDefined = 0;
         end
         
         function define_scanner(obj, yaw_channel, yaw_start, yaw_end, yaw_delta, pitch_channel, pitch_start, pitch_end, pitch_delta)
@@ -31,8 +42,55 @@ classdef VibrometerAPI
 
             ret = obj.writeline_and_get_response('scan ready');
             assert(ret == "Sucessfully defined scanner!", ret);
+
+            obj.isDefined = 1;
+        end
+        
+        function actual_point = get_position(obj, channel)
+            ret = obj.writeline_and_get_response(strcat("channel ", num2str(channel)));
+            assert(ret == strcat("channel set to: ", num2str(channel)), ret);
+
+            ret = obj.writeline_and_get_response("pos");
+
+            actual_point = extractAfter(ret,"Position: ");
+            actual_point = str2double(actual_point)/obj.prec_mod;
         end
 
+        function go_to_position(obj, channel, point_degree)
+            point_degree = point_degree * obj.prec_mod;
+            ret = obj.writeline_and_get_response("mode pos");
+            assert(ret == "mode set to: pos", ret);
+
+            ret = obj.writeline_and_get_response('motor start');
+            assert(ret == strcat("Motor started forward successfully on channel ", num2str(channel),"!"), ret);
+
+            ret = obj.writeline_and_get_response(strcat("channel " + num2str(channel)));
+            assert(ret == strcat("channel set to: ", num2str(channel)), ret);
+
+            ret = obj.writeline_and_get_response(strcat("pos ", num2str(point_degree)));
+            assert(ret == strcat("Position set to: ", num2str(point_degree)), ret);
+            
+            
+            pause(0.7);
+            ret = obj.writeline_and_get_response('actual_direction');
+            while(~contains(ret, "Motor is stationary!"))
+                pause(0.1);
+                ret = obj.writeline_and_get_response('actual_direction');
+            end
+
+            ret = obj.writeline_and_get_response('motor stop');
+            assert(ret == strcat("Motor stopped successfully on channel ", num2str(channel),"!"), ret);
+
+        end
+
+        function zero_position(obj, channel)
+            ret = obj.writeline_and_get_response(strcat("channel ", num2str(channel)));
+            assert(ret == strcat("channel set to: ", num2str(channel)), ret);
+
+            ret = obj.writeline_and_get_response("pos zero");
+            assert(ret == "Position reset succesfull", ret);
+        end
+        
         function start_scan(obj)
             ret = obj.writeline_and_get_response('scan start');
             assert(ret == "Sucessfully started scan!", ret);
