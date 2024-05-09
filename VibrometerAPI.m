@@ -19,7 +19,7 @@ classdef VibrometerAPI
             flush(obj.device);
         end
         
-        function define_scanner(obj, yaw_channel, yaw_start, yaw_end, yaw_delta, pitch_channel, pitch_start, pitch_end, pitch_delta, time_delta)
+        function define_scanner(obj, yaw_channel, yaw_start, yaw_end, yaw_delta, pitch_channel, pitch_start, pitch_end, pitch_delta)
             %METHOD1 Summary of this method goes here
             %   Detailed explanation goes here
 
@@ -29,9 +29,6 @@ classdef VibrometerAPI
             ret = obj.writeline_and_get_response(sprintf('scan define pitch %d %d %d %d', pitch_channel, pitch_start*obj.prec_mod, pitch_end*obj.prec_mod, pitch_delta*obj.prec_mod));
             assert(ret == "New scanner Pitch axis defined succesfully!", ret);
 
-            ret = obj.writeline_and_get_response(sprintf('scan define time %d', time_delta));
-            assert(ret == "New scanner wait ime between points specified to 100!", ret);
-
             ret = obj.writeline_and_get_response('scan ready');
             assert(ret == "Sucessfully defined scanner!", ret);
         end
@@ -39,6 +36,11 @@ classdef VibrometerAPI
         function start_scan(obj)
             ret = obj.writeline_and_get_response('scan start');
             assert(ret == "Sucessfully started scan!", ret);
+        end
+
+        function stop_scan(obj)
+            ret = obj.writeline_and_get_response('scan stop');
+            assert(ret == "Succesfully stopped scanner!", ret);
         end
 
         function status = get_status(obj)
@@ -59,6 +61,20 @@ classdef VibrometerAPI
             assert(ret == "Succesfully started movement to next point!", ret);
         end
         
+        function full_response = dump_points(obj)
+            writeline(obj.device, 'scan dump');
+            readline(obj.device);
+            first_line = strtrim(readline(obj.device));
+            point_count = extractBetween(first_line,"Dumping last "," points!");
+            point_count = str2double(point_count);
+
+            full_response = first_line + newline;
+
+            for line = 1:point_count
+                full_response = full_response + strtrim(readline(obj.device)) + newline;
+            end
+        end
+
         function close(obj)
             delete(obj.device)
         end
