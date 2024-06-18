@@ -1,5 +1,14 @@
+s = struct;
+recObj = audiorecorder;    
+s.meas_time = 5;
+s.meas_counter = 1;
+s.yaw_offset = 0;
+s.pitch_offset = -20;
+s.Fs = recObj.SampleRate;
+
+%%
 % Connnect to Vibrometer on appropriate port
-v = VibrometerAPI("COM17");
+v = VibrometerAPI("COM8");
 
 %%
 
@@ -52,8 +61,8 @@ assert(status == "Ready" || status == "Uninitialised", status);
 % Starting position in degrees
 % End position in degrees
 % delta between next measurement positions in degrees
-v.define_scanner(0, 10, 30, 5, ...
-                 1, 10, 30, 5);
+v.define_scanner(0, -9, 9, 1, ...
+                 1, 0, 10, 1);
 % Start scan, go to start position for yaw and pitch
 v.start_scan()
 
@@ -74,9 +83,14 @@ while(1)
     % Finished means that it was the last point, so perform the final
     % measurment and break the loop
     if(status == "Finished")
-
+        pause(2);
         [yaw, pitch] = v.get_point()
-        % Here goes final measurement
+        s_single = struct;
+        s_single.yaw = yaw;
+        s_single.pitch = pitch;
+        recordblocking(recObj,s.meas_time);
+        s_single.data = getaudiodata(recObj);
+        s.measurements(s.meas_counter) = s_single;
 
         break;
     end
@@ -88,11 +102,17 @@ while(1)
     assert(status == "WaitingForContinuation", status);
 
     % get actual point in degrees
+    pause(2);
     [yaw, pitch] = v.get_point()
     
     %perform measurement eith vibrometer:
-
-    % Here goes measurement
+    s_single = struct;
+    s_single.yaw = yaw;
+    s_single.pitch = pitch;
+    recordblocking(recObj,s.meas_time);
+    s_single.data = getaudiodata(recObj);
+    s.measurements(s.meas_counter) = s_single;
+    s.meas_counter = s.meas_counter + 1;
     
     % Go to next point:
     v.next_point()
@@ -108,3 +128,4 @@ v.dump_points();
 % putty or HostApp is opened, these connections must be closed for matlab
 % connection to be opened!
 v.close();
+save("plate_measurement.mat", "s");
