@@ -42,13 +42,13 @@ classdef VibrometerAPI
             % TODO - get status
 
             ret = obj.writeline_and_get_response(sprintf('scan define yaw %d %d %d %d', yaw_channel, yaw_start*obj.prec_mod, yaw_end*obj.prec_mod, yaw_delta*obj.prec_mod));
-            assert(ret == "New scanner Yaw axis defined succesfully!", ret);
+            assert(ret == "New scanner Yaw axis defined successfully!", ret);
 
             ret = obj.writeline_and_get_response(sprintf('scan define pitch %d %d %d %d', pitch_channel, pitch_start*obj.prec_mod, pitch_end*obj.prec_mod, pitch_delta*obj.prec_mod));
-            assert(ret == "New scanner Pitch axis defined succesfully!", ret);
+            assert(ret == "New scanner Pitch axis defined successfully!", ret);
 
             ret = obj.writeline_and_get_response('scan ready');
-            assert(ret == "Sucessfully defined scanner!", ret);
+            assert(ret == "Successfully defined scanner!", ret);
         end
         
         function actual_position = get_position(obj, channel)
@@ -110,7 +110,7 @@ classdef VibrometerAPI
             %TODO - check if state ready
 
             ret = obj.writeline_and_get_response('scan start');
-            assert(ret == "Sucessfully started scan!", ret);
+            assert(ret == "Successfully started scan!", ret);
         end
 
         function stop_scan(obj)
@@ -119,7 +119,7 @@ classdef VibrometerAPI
             % TODO - check if scan is being currently performed
 
             ret = obj.writeline_and_get_response('scan stop');
-            assert(ret == "Succesfully stopped scanner!", ret);
+            assert(ret == "successfully stopped scanner!", ret);
         end
 
         function status = get_status(obj)
@@ -149,7 +149,7 @@ classdef VibrometerAPI
             % TODO - check status
 
             ret = obj.writeline_and_get_response('scan next_point');
-            assert(ret == "Succesfully started movement to next point!", ret);
+            assert(ret == "successfully started movement to next point!", ret);
         end
         
         function full_response = dump_points(obj)
