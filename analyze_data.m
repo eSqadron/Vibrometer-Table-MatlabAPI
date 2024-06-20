@@ -1,4 +1,4 @@
-load('concrete_plate_measurement.mat')
+load('steel_plate_measurement.mat')
 
 octFiltBank = octaveFilterBank('1/3 octave', s.Fs);
 octFiltBank.FrequencyRange(1) = 22;
@@ -14,8 +14,8 @@ for i = 1:s.meas_counter
     audio_in_octaves = octFiltBank(s.measurements(i).data);
     energy_in_octaves = rms(audio_in_octaves);
     energy_vectored = energy_in_octaves * ...
-                      cos(s.measurements(i).yaw + s.yaw_offset) * ...
-                      cos(s.measurements(i).pitch + s.pitch_offset);
+                      cos(deg2rad(s.measurements(i).yaw + s.yaw_offset)) * ...
+                      cos(deg2rad(s.measurements(i).pitch + s.pitch_offset));
 
     analyzed_measurements(i, :) = energy_vectored;
     if(s.measurements(i).yaw > 180)
@@ -41,6 +41,7 @@ for i = 1:octaves_count
     [X,Y] = meshgrid(xlin, ylin);
     Z = griddata(yaws,pitches,analyzed_measurements(:,i),X,Y,'v4');
     mesh(X,Y,Z);
+    colorbar;
     view(0,90);
     colormap('jet');
     title(strcat("Wykres dla tercji ", num2str(octaves(i))));
