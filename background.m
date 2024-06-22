@@ -8,8 +8,24 @@ octFiltBank.FrequencyRange(2) = 4000;
 
 data_filtered = octFiltBank(data);
 data_rms_bckg = rms(data_filtered);
+octaves = octFiltBank.getCenterFrequencies();
+save("Background.mat", "data_rms_bckg", "octaves");
+%%
+load('Background.mat')
+fig = figure;
+fig.Position = [10,10,700,300];
+semilogx(octaves, data_rms_bckg);
 
-figure
-plot(octFiltBank.getCenterFrequencies(), data_rms_bckg);
+% labeling only every second octave
+labels=arrayfun(@(a)num2str(a, '%.1f'),octaves,'uni',0);
+labels(2:2:end) = {' '};
+xticks(octaves);
+xticklabels(labels);
 
-save("Background.mat", "data_rms_bckg");
+xlabel("Tercja [$Hz$]",'Interpreter','latex');
+ylabel("Amplituda [rms($\frac{m}{s \cdot V}$)]",'Interpreter','latex');
+title("Drgania tła (bez włączonego głośnika)");
+
+saveas(fig, "graphs/BackgroundGraph.jpg");
+
+

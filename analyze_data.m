@@ -39,11 +39,17 @@ for i = 1:octaves_count
     xlin = linspace(min(yaws), max(yaws), 100);
     ylin = linspace(min(pitches), max(pitches), 100);
     [X,Y] = meshgrid(xlin, ylin);
-    Z = griddata(yaws,pitches,analyzed_measurements(:,i),X,Y,'v4');
+    Z = griddata(yaws, pitches, analyzed_measurements(:,i), X, Y, 'v4');
     mesh(X,Y,Z);
-    colorbar;
-    view(0,90);
+    %clim([0.002, 0.1]);
+    xlabel("yaw [$^{\circ}$]",'Interpreter','latex');
+    ylabel("pitch [$^{\circ}$]",'Interpreter','latex');
+    %zlabel("rms()");
+    hcb=colorbar;
     colormap('jet');
-    title(strcat("Wykres dla tercji ", num2str(octaves(i))));
-    saveas(fig, "graphs/" + num2str(i) + "_GraphThird" + num2str(octaves(i)) + ".jpg");
+    hcb.Title.String = "$\frac{m}{s \cdot V}$";
+    hcb.Title.Interpreter = 'latex';
+    view(0,90);
+    title(strcat("Wykres dla tercji ", num2str(octaves(i), '%.1f'), "Hz"));
+    saveas(fig, "graphs/" + num2str(i, '%2.0f') + "_GraphThird.jpg");
 end
