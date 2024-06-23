@@ -128,4 +128,4 @@ v.dump_points();
 % putty or HostApp is opened, these connections must be closed for matlab
 % connection to be opened!
 v.close();
-save("steel_plate_measurement.mat", "s");
+save("meas/steel_plate_measurement.mat", "s");

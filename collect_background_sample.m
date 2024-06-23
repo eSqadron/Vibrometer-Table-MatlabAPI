@@ -9,7 +9,7 @@ octFiltBank.FrequencyRange(2) = 4000;
 data_filtered = octFiltBank(data);
 data_rms_bckg = rms(data_filtered);
 octaves = octFiltBank.getCenterFrequencies();
-save("Background.mat", "data_rms_bckg", "octaves");
+save("meas/Background.mat", "data_rms_bckg", "octaves");
 %%
 load('Background.mat')
 fig = figure;
@@ -27,5 +27,3 @@ ylabel("Amplituda [rms($\frac{m}{s \cdot V}$)]",'Interpreter','latex');
 title("Drgania tła (bez włączonego głośnika)");
 
 saveas(fig, "graphs/BackgroundGraph.jpg");
-
-

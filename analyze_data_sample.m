@@ -1,4 +1,4 @@
-load('steel_plate_measurement.mat')
+load('meas/steel_plate_measurement.mat')
 
 octFiltBank = octaveFilterBank('1/3 octave', s.Fs);
 octFiltBank.FrequencyRange(1) = 22;
